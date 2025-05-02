@@ -1,0 +1,225 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Data structure to represent the game state
+typedef struct {
+    char board[3][3];         // 3x3 game board
+    char currentPlayer;       // Tracks current player ('X' or 'O')
+} TicTacToe;
+
+
+// Function to initialize the game board
+void initializeGame(TicTacToe *game) {
+    
+    // Set the starting player to 'X'
+    game->currentPlayer = 'X';
+    
+    // Loop through each cell of the board
+    for (int i = 0; i < 3; i++) {
+         
+        for (int j = 0; j < 3; j++) {
+            
+            // Initialize each cell to an empty space
+            game->board[i][j] = ' ';
+        }
+    }
+}
+
+
+// Function to display the current game board
+void printBoard(TicTacToe *game) {
+    
+    // Print top spacing
+    printf("\n");
+
+    // Loop through the rows of the board
+    for (int i = 0; i < 3; i++) {
+        
+        // Print each cell in the row with separators
+        printf(" %c | %c | %c ", game->board[i][0], game->board[i][1], game->board[i][2]);
+        
+        // Print row separator lines except after the last row
+        if (i < 2) {
+            printf("\n---|---|---\n");
+        }
+    }
+
+    // Print bottom spacing
+    printf("\n\n");
+}
+
+
+// Function to check if the current player has won
+int checkWin(TicTacToe *game) {
+    
+    // Store the current player's symbol for comparison
+    char p = game->currentPlayer;
+
+    // Check rows and columns for a win
+    for (int i = 0; i < 3; i++) {
+        
+        // Check each row
+        if ((game->board[i][0] == p && game->board[i][1] == p && game->board[i][2] == p) ||
+            
+            // Check each column
+            (game->board[0][i] == p && game->board[1][i] == p && game->board[2][i] == p)) {
+            return 1;   // Win detected
+        }
+    }
+
+    // Check diagonals for a win
+    if ((game->board[0][0] == p && game->board[1][1] == p && game->board[2][2] == p) ||
+        (game->board[0][2] == p && game->board[1][1] == p && game->board[2][0] == p)) {
+        return 1;       // Win detected
+    }
+
+    // No win detected
+    return 0;
+}
+
+
+// Function to check if the game is a draw
+int isDraw(TicTacToe *game) {
+    
+    // Loop through all cells to check for any empty spaces
+    for (int i = 0; i < 3; i++) {
+        
+        for (int j = 0; j < 3; j++) {
+            
+            // If any cell is still empty, the game is not a draw
+            if (game->board[i][j] == ' ') {
+                return 0;
+            }
+        }
+    }
+
+    // No empty cells, and no winner means it's a draw
+    return 1;
+}
+
+
+// Function to switch the current player
+void switchPlayer(TicTacToe *game) {
+    
+    // Toggle between 'X' and 'O'
+    if (game->currentPlayer == 'X') {
+        game->currentPlayer = 'O';
+    } else {
+        game->currentPlayer = 'X';
+    }
+}
+
+
+// Function to display the main menu
+void showMenu() {
+    printf("====================================\n");
+    printf("         TIC-TAC-TOE GAME           \n");
+    printf("     Struct Based C Implementation  \n");
+    printf("====================================\n");
+    printf("   Player 1: X\n");
+    printf("   Player 2: O\n\n");
+}
+
+
+// Function to get the user's move input
+void getPlayerMove(TicTacToe *game, int *row, int *col) {
+    
+    // Prompt the current player for input
+    printf("Player %c, enter row and column (1-3): ", game->currentPlayer);
+    
+    // Read input from user
+    scanf("%d%d", row, col);
+    
+    // Convert to 0-based index
+    (*row)--;
+    (*col)--;
+}
+
+
+// Function to check if the move is valid
+int isValidMove(TicTacToe *game, int row, int col) {
+    
+    // Check bounds and if the cell is empty
+    if (row >= 0 && row < 3 && col >= 0 && col < 3) {
+        
+        if (game->board[row][col] == ' ') {
+            return 1;   // Valid move
+        }
+    }
+
+    // Invalid move
+    return 0;
+}
+
+
+// Function to run the actual game loop
+void playGame() {
+    
+    // Declare game instance and variables
+    TicTacToe game;
+    int row, col;
+    
+    // Initialize the game
+    initializeGame(&game);
+
+    // Display game instructions
+    showMenu();
+
+    // Start game loop
+    while (1) {
+
+        // Show current board
+        printBoard(&game);
+
+        // Get user move
+        getPlayerMove(&game, &row, &col);
+
+        // Validate move
+        if (!isValidMove(&game, row, col)) {
+            printf("Invalid move! Try again.\n\n");
+            continue;
+        }
+
+        // Apply the move
+        game.board[row][col] = game.currentPlayer;
+
+        // Check if the player won
+        if (checkWin(&game)) {
+            printBoard(&game);
+            printf("Player %c wins!\n", game.currentPlayer);
+            break;
+        }
+
+        // Check for draw
+        if (isDraw(&game)) {
+            printBoard(&game);
+            printf("It's a draw!\n");
+            break;
+        }
+
+        // Switch player
+        switchPlayer(&game);
+    }
+}
+
+
+// Entry point of the program
+int main() {
+    
+    char choice;
+
+    do {
+        // Run the game
+        playGame();
+
+        // Ask the user if they want to play again
+        printf("Do you want to play again? (y/n): ");
+        scanf(" %c", &choice);
+
+    } while (choice == 'y' || choice == 'Y');
+
+    // Exit message
+    printf("Thank you for playing Tic-Tac-Toe!\n");
+
+    return 0;
+}
